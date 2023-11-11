@@ -3,6 +3,7 @@ package jfile
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -79,9 +80,11 @@ func GetFilenamesByDir(root string) ([]string, error) {
 
 // 可以用于处理大文件，按行读取
 // filename: 文件名
-// pf: 处理每一行的函数
+// pf: 处理每一行的函数 int:行号，从1开始；string：该行的数据
 // isContinue: pf函数报错后是否继续处理下一行
-func ProcessLine(filename string, pf func(string) error, isContinue bool) error {
+// jfile.JCONTINUE() 进行下个循环
+// jfile.JBREAK()退出循环
+func ProcessLine(filename string, pf func(int, string) error, isContinue bool) error {
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -90,6 +93,7 @@ func ProcessLine(filename string, pf func(string) error, isContinue bool) error 
 		f.Close()
 	}()
 	r := bufio.NewReader(f)
+	line_num := 0
 	for {
 		line, err := readLine(r)
 		if err != nil {
@@ -99,10 +103,18 @@ func ProcessLine(filename string, pf func(string) error, isContinue bool) error 
 			return err
 		}
 		// 使用传进来的函数处理line
-		err = pf(line)
-		if err != nil && !isContinue {
-			return err
+		line_num += 1
+		err = pf(line_num, line)
+		if err != nil {
+			if err.Error() == "JBREAK" {
+				return fmt.Errorf("JBREAK")
+			} else if err.Error() == "JCONTINUE" {
+				continue
+			} else if !isContinue {
+				return err
+			}
 		}
+
 	}
 }
 
@@ -190,4 +202,60 @@ func FileCopy(src string, dst string) error {
 		}
 	}
 	return nil
+}
+
+// 文件移动从src到dst
+func FileMove(src string, dst string) error {
+	err := FileCopy(src, dst)
+	if err != nil {
+		return err
+	}
+	err = os.Remove(src)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// 获取文件的行数
+func GetLineCount(filePath string) int64 {
+	//Open file
+	f, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
+	if err != nil {
+		return -1
+	}
+	defer func() {
+		if err = f.Close(); err != nil {
+
+		}
+	}()
+	s := bufio.NewScanner(f)
+	var count int64 = 0
+	for s.Scan() {
+		count++
+	}
+	return count
+}
+
+// 获取特定第几行数据
+// line_num:从1开始
+func GetLineData(file_path string, line_num int) (line_data string) {
+	ProcessLine(file_path, func(inner_num int, line string) error {
+		if inner_num == line_num {
+			line_data = line
+			return JBREAK()
+		}
+		return nil
+	}, false)
+	return
+}
+
+// 退出循环
+func JBREAK() error {
+	return fmt.Errorf("JBREAK")
+}
+
+// 进行下次循环
+func JCONTINUE() error {
+	return fmt.Errorf("JCONTINUE")
 }
