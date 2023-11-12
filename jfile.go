@@ -177,16 +177,27 @@ func containsBytesCount(filepa string, cbytes []byte) int {
 }
 
 // 文件复制从src到dst
-func FileCopy(src string, dst string) error {
+//
+// b_trunc:覆盖目的文件
+func FileCopy(src string, dst string, b_trunc bool) error {
 	srcf, err := os.Open(src)
 	if err != nil {
 		return err
 	}
 	defer srcf.Close()
-	dstf, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
-		return err
+	var dstf = &os.File{}
+	if b_trunc {
+		dstf, err = os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+		if err != nil {
+			return err
+		}
+	} else {
+		dstf, err = os.OpenFile(dst, os.O_RDWR|os.O_CREATE, 0755)
+		if err != nil {
+			return err
+		}
 	}
+
 	defer dstf.Close()
 	buf := make([]byte, 500)
 	for {
@@ -206,7 +217,7 @@ func FileCopy(src string, dst string) error {
 
 // 文件移动从src到dst
 func FileMove(src string, dst string) error {
-	err := FileCopy(src, dst)
+	err := FileCopy(src, dst, true)
 	if err != nil {
 		return err
 	}
