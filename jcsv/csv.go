@@ -92,7 +92,7 @@ func KeyProcesstring(src_file, column_name, delimiter string, column_id int, wit
 		// 删除原文件
 		os.Remove(src_file)
 		// 拷贝新文件
-		jfile.FileCopy(bak2_file, src_file)
+		jfile.FileCopy(bak2_file, src_file, true)
 	} else {
 
 		jlog.Infof("[!] 该文件不包含%s%s列\n", column_name, suffix)
@@ -106,7 +106,7 @@ func KeyProcesstring(src_file, column_name, delimiter string, column_id int, wit
 	// 遍历文件行
 	// 备份原文件
 	bak_file := fmt.Sprintf("%s-%s", src_file, jstr.GenerateRandomString(8))
-	err = jfile.FileCopy(src_file, bak_file)
+	err = jfile.FileCopy(src_file, bak_file, true)
 	if err != nil {
 		jlog.Fatal(err)
 	}

@@ -20,7 +20,7 @@ func DeleteColumn(src_file string, delimeter string, column_id int) (err error) 
 	}
 	// 备份文件
 	bak_file := fmt.Sprintf("%s-%s", src_file, jstr.GenerateRandomString(8))
-	jfile.FileCopy(src_file, bak_file)
+	jfile.FileCopy(src_file, bak_file, true)
 	// 删除源文件
 	err = os.Remove(src_file)
 	if err != nil {
