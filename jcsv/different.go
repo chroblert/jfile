@@ -59,7 +59,7 @@ func GetUnique2FileByID(file1, file2, delimeter string, file1_column_id, file2_c
 	f1_line_num := 0
 	for scanner1.Scan() {
 		f1_line_num += 1
-		if file1_with_header && f2_line_num == 1 {
+		if file1_with_header && f1_line_num == 1 {
 			continue
 		}
 		line := scanner1.Text()
@@ -80,7 +80,7 @@ func GetUnique2FileByID(file1, file2, delimeter string, file1_column_id, file2_c
 
 func GetUnique2FileByName(file1, file2, delimeter string, file1_column_name, file2_column_name string, file1_with_header, file2_with_header bool, outputFileName string) (unique_count int, err error) {
 	file1_column_id := GetColumnID(file1, delimeter, file1_column_name, -1, file1_with_header)
-	file2_column_id := GetColumnID(file1, delimeter, file2_column_name, -1, file2_with_header)
+	file2_column_id := GetColumnID(file2, delimeter, file2_column_name, -1, file2_with_header)
 	// 校验
 	if file1_column_id == -1 {
 		return 0, fmt.Errorf("%scolumn_id有误", file1)
@@ -108,7 +108,7 @@ func GetUnique2FileByName(file1, file2, delimeter string, file1_column_name, fil
 	f2_line_num := 0
 	for scanner2.Scan() {
 		f2_line_num += 1
-		if file1_with_header && f2_line_num == 1 {
+		if file2_with_header && f2_line_num == 1 {
 			continue
 		}
 		line := scanner2.Text()
@@ -150,7 +150,7 @@ func GetUnique2FileByName(file1, file2, delimeter string, file1_column_name, fil
 
 func GetUniqueWordsByName(file1, file2, delimeter string, file1_column_name, file2_column_name string, file1_with_header, file2_with_header bool) (unique_word_list []string, err error) {
 	file1_column_id := GetColumnID(file1, delimeter, file1_column_name, -1, file1_with_header)
-	file2_column_id := GetColumnID(file1, delimeter, file2_column_name, -1, file2_with_header)
+	file2_column_id := GetColumnID(file2, delimeter, file2_column_name, -1, file2_with_header)
 	// 校验
 	if file1_column_id == -1 {
 		return nil, fmt.Errorf("%scolumn_id有误", file1)
@@ -178,7 +178,7 @@ func GetUniqueWordsByName(file1, file2, delimeter string, file1_column_name, fil
 	f2_line_num := 0
 	for scanner2.Scan() {
 		f2_line_num += 1
-		if file1_with_header && f2_line_num == 1 {
+		if file2_with_header && f2_line_num == 1 {
 			continue
 		}
 		line := scanner2.Text()
