@@ -296,3 +296,16 @@ func JBREAK() error {
 func JCONTINUE() error {
 	return fmt.Errorf("JCONTINUE")
 }
+
+// 返回文件的大小
+func GetFileSize(filename string) (int64, error) {
+	// 获取文件信息
+	fileInfo, err := os.Stat(filename)
+	if err != nil {
+		return 0, err
+	}
+
+	// 获取文件大小
+	size := fileInfo.Size()
+	return size, nil
+}
