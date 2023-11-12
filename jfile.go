@@ -250,6 +250,43 @@ func GetLineData(file_path string, line_num int) (line_data string) {
 	return
 }
 
+// 获取所有的文件行数据
+func GetAllLines(file_path string) (lines []string, total_line_count int) {
+	ProcessLine(file_path, func(inner_num int, line string) error {
+		lines = append(lines, line)
+		total_line_count = inner_num
+		return nil
+	}, false)
+	return
+}
+
+// 获取前n行数据
+func GetHeadNLines(file_path string, n int) (lines []string, total_line_count int) {
+	ProcessLine(file_path, func(inner_num int, line string) error {
+		lines = append(lines, line)
+		total_line_count = inner_num
+		if n == inner_num {
+			return JBREAK()
+		}
+		return JCONTINUE()
+	}, false)
+	return
+}
+
+// 获取后n行数据
+func GetTailNLines(file_path string, n int) (lines []string, start_line_count int64) {
+	all_line_count := GetLineCount(file_path)
+	start_line_count = all_line_count - int64(n) + 1
+	ProcessLine(file_path, func(inner_num int, line string) error {
+		if int64(inner_num) < start_line_count {
+			return JBREAK()
+		}
+		lines = append(lines, line)
+		return JCONTINUE()
+	}, false)
+	return
+}
+
 // 退出循环
 func JBREAK() error {
 	return fmt.Errorf("JBREAK")
