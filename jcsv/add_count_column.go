@@ -3,8 +3,6 @@ package jcsv
 import (
 	"fmt"
 	"github.com/chroblert/jfile"
-	"github.com/chroblert/jstr"
-	"os"
 	"strings"
 )
 
@@ -14,24 +12,24 @@ func AddCountColumn(src_file string, delimeter string, column_id int, new_column
 	if column_id == -1 {
 		return nil, fmt.Errorf("no such column_id:%d", column_id)
 	}
-	// 备份文件
-	bak_file := fmt.Sprintf("%s-%s", src_file, jstr.GenerateRandomString(8))
-	jfile.FileCopy(src_file, bak_file, true)
-	// 删除源文件
-	err = os.Remove(src_file)
-	if err != nil {
-		return nil, err
-	}
-	// 创建文件
-	f, err := os.OpenFile(src_file, os.O_CREATE|os.O_TRUNC|os.O_TRUNC, 0666)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if f != nil {
-			f.Close()
-		}
-	}()
+	//// 备份文件
+	//bak_file := fmt.Sprintf("%s-%s", src_file, jstr.GenerateRandomString(8))
+	//jfile.FileCopy(src_file, bak_file, true)
+	//// 删除源文件
+	//err = os.Remove(src_file)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//// 创建文件
+	//f, err := os.OpenFile(src_file, os.O_CREATE|os.O_TRUNC|os.O_TRUNC, 0666)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//defer func() {
+	//	if f != nil {
+	//		f.Close()
+	//	}
+	//}()
 	//
 	column_count_map = GetCountOfColumn(src_file, delimeter, column_id, with_header)
 	if column_count_map == nil || len(column_count_map) == 0 {
