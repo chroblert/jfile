@@ -2,6 +2,7 @@ package jcsv
 
 import (
 	"bytes"
+	"encoding/csv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -92,7 +93,7 @@ func QuoteField(field string, useCRLF bool) (quotedString string, err error) {
 // @param: comma: 文件由什么分割，默认：,
 //
 // @return: string: 空可能是报错
-func OutputField(field string, comma ...rune) string {
+func EncodeField(field string, comma ...rune) string {
 	if len(comma) == 0 {
 		if FieldNeedsQuotes(field, ',') {
 			field, err := QuoteField(field, true)
@@ -112,5 +113,20 @@ func OutputField(field string, comma ...rune) string {
 		}
 		return field
 	}
+
+}
+
+func DecodeString2List(line string, comma_list ...rune) []string {
+	//comma := ','
+	//if len(comma_list) > 0 {
+	//	comma = comma_list[0]
+	//}
+	//
+	rr := csv.NewReader(bytes.NewReader([]byte(line)))
+	word_list, err := rr.Read()
+	if err != nil {
+		return nil
+	}
+	return word_list
 
 }
