@@ -93,7 +93,7 @@ func GetFilenamesByDir(root string) ([]string, error) {
 //
 // error: 报错
 func ProcessLine(filename string, pf func(int, string) error, isContinue bool) (bool, int, error) {
-	f, err := os.Open(filename)
+	f, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
 		return false, -1, err
 	}
