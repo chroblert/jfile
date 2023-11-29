@@ -78,16 +78,24 @@ func GetFilenamesByDir(root string) ([]string, error) {
 	return files, nil
 }
 
-// 可以用于处理大文件，按行读取
+// ProcessLine 可以用于处理大文件，按行读取
 // filename: 文件名
 // pf: 处理每一行的函数 int:行号，从1开始；string：该行的数据
 // isContinue: pf函数报错后是否继续处理下一行
 // jfile.JCONTINUE() 进行下个循环
 // jfile.JBREAK()退出循环
-func ProcessLine(filename string, pf func(int, string) error, isContinue bool) error {
+//
+// returns
+//
+// bool: 是否遍历完全
+//
+// int:  处理到哪一行，从1开始
+//
+// error: 报错
+func ProcessLine(filename string, pf func(int, string) error, isContinue bool) (bool, int, error) {
 	f, err := os.Open(filename)
 	if err != nil {
-		return err
+		return false, -1, err
 	}
 	defer func() {
 		f.Close()
@@ -98,20 +106,20 @@ func ProcessLine(filename string, pf func(int, string) error, isContinue bool) e
 		line, err := readLine(r)
 		if err != nil {
 			if err == io.EOF {
-				return nil
+				return true, line_num, nil
 			}
-			return err
+			return false, line_num, err
 		}
 		// 使用传进来的函数处理line
 		line_num += 1
 		err = pf(line_num, line)
 		if err != nil {
 			if err.Error() == "JBREAK" {
-				return fmt.Errorf("JBREAK")
+				return false, line_num, nil
 			} else if err.Error() == "JCONTINUE" {
 				continue
 			} else if !isContinue {
-				return err
+				return false, line_num, err
 			}
 		}
 
