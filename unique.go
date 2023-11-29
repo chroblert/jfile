@@ -1,50 +1,37 @@
 package jfile
 
 import (
-	"bufio"
 	"crypto/md5"
 	"fmt"
 	"github.com/chroblert/jstr"
-	"io"
 	"os"
 )
 
 func Unique(srcFile, uniqueFile string) {
-	//inputFile := srcFile
 	outputFile := uniqueFile
-	input, err := os.Open(srcFile)
-	if err != nil {
-		fmt.Println("无法打开输入文件:", err)
-		return
-	}
-	defer input.Close()
-
-	output, err := os.Create(outputFile)
+	seenLines := make(map[[16]byte]bool)
+	unique_count := 0
+	output, err := os.OpenFile(outputFile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
 	if err != nil {
 		fmt.Println("无法创建输出文件:", err)
 		return
 	}
 	defer output.Close()
-
-	seenLines := make(map[[16]byte]bool)
-	scanner := bufio.NewScanner(input)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		lineBytes := []byte(line)
-		hash := calculateHash(lineBytes)
-
+	_, _, err = ProcessLine(srcFile, func(line_num int, line string) error {
+		hash := calculateHash([]byte(line))
 		if !seenLines[hash] {
 			seenLines[hash] = true
-			_, err := io.WriteString(output, line+"\n")
+			unique_count += 1
+			_, err = output.Write([]byte(line + "\n"))
 			if err != nil {
 				fmt.Println("无法写入输出文件:", err)
-				return
+				return JCONTINUE()
 			}
 		}
-	}
+		return JCONTINUE()
+	}, false)
 
-	if err := scanner.Err(); err != nil {
+	if err != nil {
 		fmt.Println("读取输入文件时发生错误:", err)
 	}
 
@@ -58,43 +45,30 @@ func UniqueInSameFile(srcFile string) (unique_count int, err error) {
 
 	//inputFile := srcFile
 	outputFile := srcFile
-	input, err := os.Open(bak_file)
-	if err != nil {
-		fmt.Println("无法打开输入文件:", err)
-		return
-	}
-	defer func() {
-		input.Close()
-		os.Remove(bak_file)
-	}()
-
+	seenLines := make(map[[16]byte]bool)
+	unique_count = 0
 	output, err := os.Create(outputFile)
 	if err != nil {
 		fmt.Println("无法创建输出文件:", err)
 		return
 	}
 	defer output.Close()
-
-	seenLines := make(map[[16]byte]bool)
-	scanner := bufio.NewScanner(input)
-	unique_count = 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		lineBytes := []byte(line)
-		hash := calculateHash(lineBytes)
-
+	_, _, err = ProcessLine(bak_file, func(line_Num int, line string) error {
+		hash := calculateHash([]byte(line))
 		if !seenLines[hash] {
 			seenLines[hash] = true
 			unique_count += 1
-			_, err = io.WriteString(output, line+"\n")
+			_, err = output.Write([]byte(line + "\n"))
+			//_, err = io.WriteString(output, line+"\n")
 			if err != nil {
 				fmt.Println("无法写入输出文件:", err)
-				return
+				return JCONTINUE()
 			}
 		}
-	}
-
-	if err := scanner.Err(); err != nil {
+		return JCONTINUE()
+	}, false)
+	os.Remove(bak_file)
+	if err != nil {
 		fmt.Println("读取输入文件时发生错误:", err)
 	}
 
