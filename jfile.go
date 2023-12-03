@@ -126,6 +126,105 @@ func ProcessLine(filename string, pf func(int, string) error, isContinue bool) (
 	}
 }
 
+// ProcessLineReverse 可以用于处理大文件，按行读取
+// filename: 文件名
+// pf: 处理每一行的函数 int:行号，从1开始，从最后一行开始；string：该行的数据，不包含该行末尾的\r\n或\n
+// isContinue: pf函数报错后是否继续处理下一行
+// jfile.JCONTINUE() 进行下个循环
+// jfile.JBREAK()退出循环
+//
+// returns
+//
+// bool: 是否遍历完全
+//
+// int:  处理到哪一个偏移，从-1开始，从后向前
+//
+// error: 报错
+func ProcessLineReverse(filename string, pf func(int64, string) error, isContinue bool) (bComplete bool, offset int64, err error) {
+	f, err := os.OpenFile(filename, os.O_RDONLY, 0)
+	if err != nil {
+		return false, -1, err
+	}
+	defer func() {
+		f.Close()
+	}()
+	buff := make([]byte, 0, 4096)
+	char := make([]byte, 1)
+
+	// 查询文件大小
+	stat, err := f.Stat()
+	if err != nil {
+		return false, 0, err
+	}
+	filesize := stat.Size()
+	if filesize < 1 {
+		return false, 0, fmt.Errorf("file size(%d) < 1", filesize)
+	}
+	// 文件偏移
+	offset = 0
+	// 从后向前的行数
+	var lineCount int64 = 0
+	lastByteIsSlashN := false
+	for {
+		offset -= 1
+		_, err = f.Seek(offset, io.SeekEnd)
+		if err != nil {
+			return
+		}
+		_, err = f.Read(char)
+		if err != nil {
+			return
+		}
+		//jlog.Debug("char:", char)
+		if char[0] == '\n' {
+			lastByteIsSlashN = true
+			if len(buff) > 0 {
+				revers(buff)
+			}
+			// 读取到的行
+			lineCount++
+			err = pf(lineCount, string(buff))
+			if err != nil {
+				if err.Error() == "JBREAK" {
+					return false, offset, nil
+				} else if err.Error() == "JCONTINUE" {
+					continue
+				} else if !isContinue {
+					return false, offset, err
+				}
+			}
+			buff = buff[:0]
+		} else if char[0] == '\r' && lastByteIsSlashN {
+			lastByteIsSlashN = false
+			buff = buff[:0]
+		} else {
+			buff = append(buff, char[0])
+		}
+		// 判断是否是文件开头
+		if offset == -filesize {
+			lineCount++
+			err = pf(lineCount, string(buff))
+			if err != nil {
+				if err.Error() == "JBREAK" {
+					return false, offset, nil
+				} else if err.Error() == "JCONTINUE" {
+					break
+				} else if !isContinue {
+					return false, offset, err
+				}
+			}
+			break
+		}
+	}
+	return true, offset, nil
+}
+
+func revers(s []byte) {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+}
+
 // 解决单行超过4096字节的文本读取问题
 func readLine(r *bufio.Reader) (string, error) {
 	line2 := []byte{}
