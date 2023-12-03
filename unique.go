@@ -7,10 +7,10 @@ import (
 	"os"
 )
 
-func Unique(srcFile, uniqueFile string) {
+func Unique(srcFile, uniqueFile string) (uniqueCount int64, err error) {
 	outputFile := uniqueFile
 	seenLines := make(map[[16]byte]bool)
-	unique_count := 0
+	uniqueCount = 0
 	output, err := os.OpenFile(outputFile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
 	if err != nil {
 		fmt.Println("无法创建输出文件:", err)
@@ -21,7 +21,7 @@ func Unique(srcFile, uniqueFile string) {
 		hash := calculateHash([]byte(line))
 		if !seenLines[hash] {
 			seenLines[hash] = true
-			unique_count += 1
+			uniqueCount += 1
 			_, err = output.Write([]byte(line + "\n"))
 			if err != nil {
 				fmt.Println("无法写入输出文件:", err)
@@ -33,12 +33,14 @@ func Unique(srcFile, uniqueFile string) {
 
 	if err != nil {
 		fmt.Println("读取输入文件时发生错误:", err)
+		return
 	}
 
 	fmt.Println("去重完成，结果已写入", outputFile)
+	return
 }
 
-func UniqueInSameFile(srcFile string) (unique_count int, err error) {
+func UniqueInSameFile(srcFile string) (uniqueCount int, err error) {
 	// 移动文件
 	bak_file := fmt.Sprintf("%s-%s", srcFile, jstr.GenerateRandomString(8))
 	FileMove(srcFile, bak_file)
@@ -46,7 +48,7 @@ func UniqueInSameFile(srcFile string) (unique_count int, err error) {
 	//inputFile := srcFile
 	outputFile := srcFile
 	seenLines := make(map[[16]byte]bool)
-	unique_count = 0
+	uniqueCount = 0
 	output, err := os.Create(outputFile)
 	if err != nil {
 		fmt.Println("无法创建输出文件:", err)
@@ -57,7 +59,7 @@ func UniqueInSameFile(srcFile string) (unique_count int, err error) {
 		hash := calculateHash([]byte(line))
 		if !seenLines[hash] {
 			seenLines[hash] = true
-			unique_count += 1
+			uniqueCount += 1
 			_, err = output.Write([]byte(line + "\n"))
 			//_, err = io.WriteString(output, line+"\n")
 			if err != nil {
@@ -70,6 +72,7 @@ func UniqueInSameFile(srcFile string) (unique_count int, err error) {
 	os.Remove(bak_file)
 	if err != nil {
 		fmt.Println("读取输入文件时发生错误:", err)
+		return
 	}
 
 	fmt.Println("去重完成，结果已写入", outputFile)
