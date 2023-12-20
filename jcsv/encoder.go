@@ -116,13 +116,15 @@ func EncodeField(field string, comma ...rune) string {
 
 }
 
+// DecodeString2List 将一行分割为字符串列表，使用传入的第一个comma作为分隔符。若不传，默认为逗号
 func DecodeString2List(line string, comma_list ...rune) []string {
-	//comma := ','
-	//if len(comma_list) > 0 {
-	//	comma = comma_list[0]
-	//}
+	comma := ','
+	if len(comma_list) > 0 {
+		comma = comma_list[0]
+	}
 	//
 	rr := csv.NewReader(bytes.NewReader([]byte(line)))
+	rr.Comma = comma
 	word_list, err := rr.Read()
 	if err != nil {
 		return nil
