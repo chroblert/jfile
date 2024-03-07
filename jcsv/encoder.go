@@ -116,6 +116,25 @@ func EncodeField(field string, comma ...rune) string {
 
 }
 
+// EncodeStringList2StringList 判断字符串列表中的元素是否需要quote，并在quote之后转成字符串列表
+func EncodeStringList2StringList(wordList []string, comma ...rune) (newWordList []string, err error) {
+	delimiter := ','
+	if len(comma) > 0 {
+		delimiter = comma[0]
+	}
+	newWordList = make([]string, len(wordList))
+	for k, word := range wordList {
+		if FieldNeedsQuotes(word, delimiter) {
+			field, err := QuoteField(word, true)
+			if err != nil {
+				return
+			}
+			newWordList[k] = field
+		}
+	}
+	return
+}
+
 // DecodeString2List 将一行分割为字符串列表，使用传入的第一个comma作为分隔符。若不传，默认为逗号
 func DecodeString2List(line string, comma_list ...rune) []string {
 	comma := ','
@@ -130,5 +149,4 @@ func DecodeString2List(line string, comma_list ...rune) []string {
 		return nil
 	}
 	return word_list
-
 }
