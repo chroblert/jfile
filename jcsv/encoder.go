@@ -125,7 +125,8 @@ func EncodeStringList2StringList(wordList []string, comma ...rune) (newWordList 
 	newWordList = make([]string, len(wordList))
 	for k, word := range wordList {
 		if FieldNeedsQuotes(word, delimiter) {
-			field, err := QuoteField(word, true)
+			var field string
+			field, err = QuoteField(word, true)
 			if err != nil {
 				return
 			}
