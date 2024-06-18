@@ -92,7 +92,7 @@ func GetFilenamesByDir(root string) ([]string, error) {
 // int:  处理到哪一行，从1开始
 //
 // error: 报错
-func ProcessLine(filename string, pf func(int, string) error, isContinue bool) (bool, int, error) {
+func ProcessLine(filename string, pf func(int64, string) error, isContinue bool) (bool, int64, error) {
 	f, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
 		return false, -1, err
@@ -101,7 +101,7 @@ func ProcessLine(filename string, pf func(int, string) error, isContinue bool) (
 		f.Close()
 	}()
 	r := bufio.NewReader(f)
-	line_num := 0
+	var line_num int64 = 0
 	for {
 		line, err := readLine(r)
 		if err != nil {
@@ -283,7 +283,7 @@ func containsBytesCount(filepa string, cbytes []byte) int {
 	return count
 }
 
-// 文件复制从src到dst
+// FileCopy 文件复制从src到dst
 //
 // b_trunc:覆盖目的文件
 func FileCopy(src string, dst string, b_trunc bool) error {
@@ -322,7 +322,7 @@ func FileCopy(src string, dst string, b_trunc bool) error {
 	return nil
 }
 
-// 文件移动从src到dst
+// FileMove 文件移动从src到dst
 func FileMove(src string, dst string) error {
 	err := FileCopy(src, dst, true)
 	if err != nil {
@@ -335,30 +335,24 @@ func FileMove(src string, dst string) error {
 	return nil
 }
 
-// 获取文件的行数
+// GetLineCount 获取文件的行数
 func GetLineCount(filePath string) int64 {
 	//Open file
-	f, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
+	var count int64
+	_, _, err := ProcessLine(filePath, func(lineNum int64, line string) error {
+		count = int64(lineNum)
+		return JCONTINUE()
+	}, false)
 	if err != nil {
-		return -1
-	}
-	defer func() {
-		if err = f.Close(); err != nil {
-
-		}
-	}()
-	s := bufio.NewScanner(f)
-	var count int64 = 0
-	for s.Scan() {
-		count++
+		return 0
 	}
 	return count
 }
 
-// 获取特定第几行数据
+// GetLineData 获取特定第几行数据
 // line_num:从1开始
-func GetLineData(file_path string, line_num int) (line_data string) {
-	ProcessLine(file_path, func(inner_num int, line string) error {
+func GetLineData(file_path string, line_num int64) (line_data string) {
+	ProcessLine(file_path, func(inner_num int64, line string) error {
 		if inner_num == line_num {
 			line_data = line
 			return JBREAK()
@@ -368,9 +362,9 @@ func GetLineData(file_path string, line_num int) (line_data string) {
 	return
 }
 
-// 获取所有的文件行数据
-func GetAllLines(file_path string) (lines []string, total_line_count int) {
-	ProcessLine(file_path, func(inner_num int, line string) error {
+// GetAllLines 获取所有的文件行数据
+func GetAllLines(file_path string) (lines []string, total_line_count int64) {
+	ProcessLine(file_path, func(inner_num int64, line string) error {
 		lines = append(lines, line)
 		total_line_count = inner_num
 		return nil
@@ -378,9 +372,9 @@ func GetAllLines(file_path string) (lines []string, total_line_count int) {
 	return
 }
 
-// 获取前n行数据
-func GetHeadNLines(file_path string, n int) (lines []string, total_line_count int) {
-	ProcessLine(file_path, func(inner_num int, line string) error {
+// GetHeadNLines 获取前n行数据
+func GetHeadNLines(file_path string, n int64) (lines []string, total_line_count int64) {
+	ProcessLine(file_path, func(inner_num int64, line string) error {
 		lines = append(lines, line)
 		total_line_count = inner_num
 		if n == inner_num {
@@ -391,11 +385,11 @@ func GetHeadNLines(file_path string, n int) (lines []string, total_line_count in
 	return
 }
 
-// 获取后n行数据
-func GetTailNLines(file_path string, n int) (lines []string, start_line_count int64) {
+// GetTailNLines 获取后n行数据
+func GetTailNLines(file_path string, n int64) (lines []string, start_line_count int64) {
 	all_line_count := GetLineCount(file_path)
 	start_line_count = all_line_count - int64(n) + 1
-	ProcessLine(file_path, func(inner_num int, line string) error {
+	ProcessLine(file_path, func(inner_num int64, line string) error {
 		if int64(inner_num) < start_line_count {
 			return JBREAK()
 		}
@@ -405,17 +399,17 @@ func GetTailNLines(file_path string, n int) (lines []string, start_line_count in
 	return
 }
 
-// 退出循环
+// JBREAK 退出循环
 func JBREAK() error {
 	return fmt.Errorf("JBREAK")
 }
 
-// 进行下次循环
+// JCONTINUE 进行下次循环
 func JCONTINUE() error {
 	return fmt.Errorf("JCONTINUE")
 }
 
-// 返回文件的大小
+// GetFileSize 返回文件的大小
 func GetFileSize(filename string) (int64, error) {
 	// 获取文件信息
 	fileInfo, err := os.Stat(filename)
