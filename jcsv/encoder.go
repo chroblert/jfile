@@ -3,9 +3,8 @@ package jcsv
 import (
 	"bytes"
 	"encoding/csv"
+	"github.com/chroblert/jfile/jcsv/gocsv"
 	"strings"
-	"unicode"
-	"unicode/utf8"
 )
 
 // FieldNeedsQuotes 判断字段field是否需要用双引号括起来
@@ -23,21 +22,7 @@ func FieldNeedsQuotes(field string, comma_list ...rune) bool {
 	if len(comma_list) > 0 {
 		comma = comma_list[0]
 	}
-	if comma < utf8.RuneSelf {
-		for i := 0; i < len(field); i++ {
-			c := field[i]
-			if c == '\n' || c == '\r' || c == '"' || c == byte(comma) {
-				return true
-			}
-		}
-	} else {
-		if strings.ContainsRune(field, comma) || strings.ContainsAny(field, "\"\r\n") {
-			return true
-		}
-	}
-
-	r1, _ := utf8.DecodeRuneInString(field)
-	return unicode.IsSpace(r1)
+	return gocsv.FieldNeedsQuotes(field, comma)
 }
 
 // QuoteField 输出引起来的字段值
