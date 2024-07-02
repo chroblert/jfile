@@ -17,7 +17,7 @@ func GetColumnIntValues(src_file string, delimeter string, column_id int, with_h
 		return
 	}
 	//
-	jfile.ProcessLine(src_file, func(line_num int, line string) error {
+	jfile.ProcessLine(src_file, func(line_num int64, line string) error {
 		if with_header && line_num == 1 {
 			return jfile.JCONTINUE()
 		}
@@ -42,7 +42,7 @@ func GetColumnStringValuesByID(src_file string, delimeter string, column_id int,
 		return nil, fmt.Errorf("列数不足")
 	}
 	//
-	jfile.ProcessLine(src_file, func(line_num int, line string) error {
+	jfile.ProcessLine(src_file, func(line_num int64, line string) error {
 		if with_header && line_num == 1 {
 			return jfile.JCONTINUE()
 		}
@@ -62,7 +62,7 @@ func GetColumnStringValuesByName(src_file string, delimeter string, column_name 
 		return nil, fmt.Errorf("列数不足")
 	}
 	//
-	jfile.ProcessLine(src_file, func(line_num int, line string) error {
+	jfile.ProcessLine(src_file, func(line_num int64, line string) error {
 		if with_header && line_num == 1 {
 			return jfile.JCONTINUE()
 		}
@@ -88,7 +88,7 @@ func GetColumnStringValues2FileByName(src_file string, delimeter string, column_
 	}
 	defer outputFile.Close()
 	column_count = 0
-	jfile.ProcessLine(src_file, func(line_num int, line string) error {
+	jfile.ProcessLine(src_file, func(line_num int64, line string) error {
 		if with_header && line_num == 1 {
 			return jfile.JCONTINUE()
 		}
@@ -115,7 +115,7 @@ func GetColumnStringValues2FileByID(src_file string, delimeter string, column_id
 	}
 	defer outputFile.Close()
 	column_count = 0
-	jfile.ProcessLine(src_file, func(line_num int, line string) error {
+	jfile.ProcessLine(src_file, func(line_num int64, line string) error {
 		if with_header && line_num == 1 {
 			return jfile.JCONTINUE()
 		}

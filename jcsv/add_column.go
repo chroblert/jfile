@@ -35,7 +35,7 @@ func AddColumnByID(src_file string, delimeter string, column_id int, ref_column_
 		}
 	}()
 	//
-	jfile.ProcessLine(bak_file, func(line_num int, line string) error {
+	jfile.ProcessLine(bak_file, func(line_num int64, line string) error {
 		word_list := strings.Split(line, ",")
 		new_word_list := make([]string, len(word_list[:column_id+1]))
 		copy(new_word_list, word_list[:column_id+1])

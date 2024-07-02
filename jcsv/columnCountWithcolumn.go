@@ -40,7 +40,7 @@ func StatisticUniqueColumnCountWithKey(src_file string, column_name string, ref_
 	//
 	var ref_column_map = make(map[string][]string)
 	var ref_column_count_map = make(map[string]int)
-	jfile.ProcessLine(src_file, func(line_num int, line string) error {
+	jfile.ProcessLine(src_file, func(line_num int64, line string) error {
 		if line_num == 1 {
 			jfile.JCONTINUE()
 		}
