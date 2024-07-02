@@ -27,7 +27,7 @@ func Merge(dstFile string, coroutineCount int, srcFileList ...string) (count int
 	//var taskChan = make(chan struct{})
 	for _, srcFile := range srcFileList {
 		err = a.Init("1").CAdd(func(srcFile string) {
-			_, _, err = ProcessLine(srcFile, func(line_num int, line string) error {
+			_, _, err = ProcessLine(srcFile, func(line_num int64, line string) error {
 				dst_f.Write([]byte(line + "\n"))
 				count += 1
 				//resChan <- struct{}{}

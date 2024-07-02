@@ -11,10 +11,10 @@ func ADiffB(AFile, BFile, dstFile string, coroutinCount int) (diffCount int, err
 	defer dst_f.Flush()
 	diffCount = 0
 	a := jasync.NewAR(int64(coroutinCount))
-	_, _, err = ProcessLine(AFile, func(line_num int, line string) error {
+	_, _, err = ProcessLine(AFile, func(line_num int64, line string) error {
 		a.Init("1").CAdd(func(line string) {
 			bFinded := false
-			_, _, err = ProcessLine(BFile, func(b_line_num int, b_line string) error {
+			_, _, err = ProcessLine(BFile, func(b_line_num int64, b_line string) error {
 				if line == b_line {
 					bFinded = true
 					return JBREAK()
