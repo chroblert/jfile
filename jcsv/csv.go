@@ -29,7 +29,7 @@ func KeyProcesstring(src_file, column_name, delimiter string, column_id int, wit
 		}
 	}()
 	b_contain_count_order := false
-	jfile.ProcessLine(src_file, func(tmp_line_num int64, line string) error {
+	jfile.ProcessLine64(src_file, func(tmp_line_num int64, line string) error {
 		line_num += 1
 		word_list := strings.Split(line, delimiter)
 		// 获取column_id
@@ -128,7 +128,7 @@ func KeyProcesstring(src_file, column_name, delimiter string, column_id int, wit
 	}()
 	line_num = 0
 	// 将添加_count,_order的数据写入文件
-	jfile.ProcessLine(bak_file, func(tmp_line_num int64, line string) error {
+	jfile.ProcessLine64(bak_file, func(tmp_line_num int64, line string) error {
 		line_num += 1
 		word_list := strings.Split(line, delimiter)
 		if len(strings.TrimSpace(line)) == 0 || len(word_list) < column_id+1 {

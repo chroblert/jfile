@@ -37,7 +37,7 @@ func DeleteColumn(src_file string, delimeter string, column_id int) (err error) 
 		}
 	}()
 	//
-	jfile.ProcessLine(bak_file, func(line_num int64, line string) error {
+	jfile.ProcessLine64(bak_file, func(line_num int64, line string) error {
 		word_list := strings.Split(line, ",")
 		new_word_list := make([]string, len(word_list[:column_id]))
 		copy(new_word_list, word_list[:column_id])

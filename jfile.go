@@ -78,21 +78,17 @@ func GetFilenamesByDir(root string) ([]string, error) {
 	return files, nil
 }
 
-// ProcessLine 可以用于处理大文件，按行读取
+// ProcessLine64 可以用于处理大文件，按行读取
 // filename: 文件名
-// pf: 处理每一行的函数 int:行号，从1开始；string：该行的数据
+// pf: 处理每一行的函数 int64:行号，从1开始；string：该行的数据
 // isContinue: pf函数报错后是否继续处理下一行
 // jfile.JCONTINUE() 进行下个循环
 // jfile.JBREAK()退出循环
-//
 // returns
-//
 // bool: 是否遍历完全
-//
-// int:  处理到哪一行，从1开始
-//
+// int64:  处理到哪一行，从1开始
 // error: 报错
-func ProcessLine(filename string, pf func(int64, string) error, isContinue bool) (bool, int64, error) {
+func ProcessLine64(filename string, pf func(int64, string) error, isContinue bool) (bool, int64, error) {
 	f, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
 		return false, -1, err
@@ -126,7 +122,51 @@ func ProcessLine(filename string, pf func(int64, string) error, isContinue bool)
 	}
 }
 
-// ProcessLineReverse 可以用于处理大文件，按行读取
+// ProcessLine 可以用于处理大文件，按行读取
+// filename: 文件名
+// pf: 处理每一行的函数 int:行号，从1开始；string：该行的数据
+// isContinue: pf函数报错后是否继续处理下一行
+// jfile.JCONTINUE() 进行下个循环
+// jfile.JBREAK()退出循环
+// returns
+// bool: 是否遍历完全
+// int:  处理到哪一行，从1开始
+// error: 报错
+func ProcessLine(filename string, pf func(int, string) error, isContinue bool) (bool, int, error) {
+	f, err := os.OpenFile(filename, os.O_RDONLY, 0)
+	if err != nil {
+		return false, -1, err
+	}
+	defer func() {
+		f.Close()
+	}()
+	r := bufio.NewReader(f)
+	var line_num = 0
+	for {
+		line, err := readLine(r)
+		if err != nil {
+			if err == io.EOF {
+				return true, line_num, nil
+			}
+			return false, line_num, err
+		}
+		// 使用传进来的函数处理line
+		line_num += 1
+		err = pf(line_num, line)
+		if err != nil {
+			if err.Error() == "JBREAK" {
+				return false, line_num, nil
+			} else if err.Error() == "JCONTINUE" {
+				continue
+			} else if !isContinue {
+				return false, line_num, err
+			}
+		}
+
+	}
+}
+
+// ProcessLineReverse64 可以用于处理大文件，按行读取
 // filename: 文件名
 // pf: 处理每一行的函数 int:行号，从1开始，从最后一行开始；string：该行的数据，不包含该行末尾的\r\n或\n
 // isContinue: pf函数报错后是否继续处理下一行
@@ -140,7 +180,7 @@ func ProcessLine(filename string, pf func(int64, string) error, isContinue bool)
 // int:  处理到哪一个偏移，从-1开始，从后向前
 //
 // error: 报错
-func ProcessLineReverse(filename string, pf func(int64, string) error, isContinue bool) (bComplete bool, offset int64, err error) {
+func ProcessLineReverse64(filename string, pf func(int64, string) error, isContinue bool) (bComplete bool, offset int64, err error) {
 	f, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
 		return false, -1, err
@@ -338,21 +378,21 @@ func FileMove(src string, dst string) error {
 // GetLineCount 获取文件的行数
 func GetLineCount(filePath string) int64 {
 	//Open file
-	var count int64
-	_, _, err := ProcessLine(filePath, func(lineNum int64, line string) error {
-		count = int64(lineNum)
+	//var count int64
+	_, totalLine, err := ProcessLine64(filePath, func(lineNum int64, line string) error {
+		//count = int64(lineNum)
 		return JCONTINUE()
 	}, false)
 	if err != nil {
 		return 0
 	}
-	return count
+	return totalLine
 }
 
 // GetLineData 获取特定第几行数据
 // line_num:从1开始
 func GetLineData(file_path string, line_num int64) (line_data string) {
-	ProcessLine(file_path, func(inner_num int64, line string) error {
+	ProcessLine64(file_path, func(inner_num int64, line string) error {
 		if inner_num == line_num {
 			line_data = line
 			return JBREAK()
@@ -364,7 +404,7 @@ func GetLineData(file_path string, line_num int64) (line_data string) {
 
 // GetAllLines 获取所有的文件行数据
 func GetAllLines(file_path string) (lines []string, total_line_count int64) {
-	ProcessLine(file_path, func(inner_num int64, line string) error {
+	ProcessLine64(file_path, func(inner_num int64, line string) error {
 		lines = append(lines, line)
 		total_line_count = inner_num
 		return nil
@@ -374,7 +414,7 @@ func GetAllLines(file_path string) (lines []string, total_line_count int64) {
 
 // GetHeadNLines 获取前n行数据
 func GetHeadNLines(file_path string, n int64) (lines []string, total_line_count int64) {
-	ProcessLine(file_path, func(inner_num int64, line string) error {
+	ProcessLine64(file_path, func(inner_num int64, line string) error {
 		lines = append(lines, line)
 		total_line_count = inner_num
 		if n == inner_num {
@@ -389,7 +429,7 @@ func GetHeadNLines(file_path string, n int64) (lines []string, total_line_count 
 func GetTailNLines(file_path string, n int64) (lines []string, start_line_count int64) {
 	all_line_count := GetLineCount(file_path)
 	start_line_count = all_line_count - int64(n) + 1
-	ProcessLine(file_path, func(inner_num int64, line string) error {
+	ProcessLine64(file_path, func(inner_num int64, line string) error {
 		if int64(inner_num) < start_line_count {
 			return JBREAK()
 		}

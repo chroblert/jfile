@@ -49,7 +49,7 @@ func GetCountOfColumn(src_file, delimeter string, column_id int, with_header boo
 	}
 	column_count_map = make(map[string]int)
 	// 统计单元格数值
-	jfile.ProcessLine(src_file, func(line_num int64, line string) error {
+	jfile.ProcessLine64(src_file, func(line_num int64, line string) error {
 		if with_header && line_num == 1 {
 			return jfile.JCONTINUE()
 		}

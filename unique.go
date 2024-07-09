@@ -17,7 +17,7 @@ func Unique(srcFile, uniqueFile string) (uniqueCount int64, err error) {
 		return
 	}
 	defer output.Close()
-	_, _, err = ProcessLine(srcFile, func(line_num int64, line string) error {
+	_, _, err = ProcessLine64(srcFile, func(line_num int64, line string) error {
 		hash := calculateHash([]byte(line))
 		if !seenLines[hash] {
 			seenLines[hash] = true
@@ -55,7 +55,7 @@ func UniqueInSameFile(srcFile string) (uniqueCount int, err error) {
 		return
 	}
 	defer output.Close()
-	_, _, err = ProcessLine(bak_file, func(line_Num int64, line string) error {
+	_, _, err = ProcessLine64(bak_file, func(line_Num int64, line string) error {
 		hash := calculateHash([]byte(line))
 		if !seenLines[hash] {
 			seenLines[hash] = true

@@ -26,7 +26,7 @@ func SimpleJson2CSV(srcFile, dstFile string) (err error) {
 	// 示例 JSON 字符串
 	// 记录第一行的key
 	var keyList []string
-	_, _, err = jfile.ProcessLine(srcFile, func(line_num int64, line string) error {
+	_, _, err = jfile.ProcessLine64(srcFile, func(line_num int64, line string) error {
 		// 解析 JSON 数据到 map
 		var data map[string]interface{}
 		if err := json.Unmarshal([]byte(line), &data); err != nil {

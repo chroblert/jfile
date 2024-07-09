@@ -16,7 +16,7 @@ func TransTsv2CSVConcurrent(src_file, dst_file string, with_header bool, corouti
 	//a := jasync.New(true)
 	////total_line := jfile.GetLineCount(src_file)
 	////bar := progressbar.Default(total_line)
-	//jfile.ProcessLine(src_file, func(line_num int64, line string) error {
+	//jfile.ProcessLine64(src_file, func(line_num int64, line string) error {
 	//	word_list := strings.Split(line, "\t")
 	//	// 判断with_header
 	//	if with_header && line_num == 1 {

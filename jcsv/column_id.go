@@ -16,7 +16,7 @@ import (
 func GetColumnID(src_file, delimiter string, column_name string, column_id int, with_header bool) (real_column_id int) {
 	line_num := 0
 	real_column_id = -1
-	jfile.ProcessLine(src_file, func(tmp int64, line string) error {
+	jfile.ProcessLine64(src_file, func(tmp int64, line string) error {
 		line_num += 1
 		word_list := strings.Split(line, delimiter)
 		if line_num == 1 {
