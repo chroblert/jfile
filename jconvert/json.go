@@ -7,7 +7,7 @@ import (
 	"github.com/chroblert/jfile/jcsv"
 	"github.com/chroblert/jlog"
 	"reflect"
-	"slices"
+	"sort"
 	"strings"
 )
 
@@ -71,7 +71,10 @@ func SimpleJson2CSV(srcFile, dstFile string) (err error) {
 			keyValue[key] = tmpValue
 		}
 		if line_num == 1 {
-			slices.Sort(keyList)
+			//slices.Sort(keyList)
+			sort.Slice(keyList, func(i, j int) bool {
+				return keyList[i] < keyList[j]
+			})
 			dst_f.NInfo(strings.Join(keyList, ","))
 		}
 		for _, key := range keyList {
