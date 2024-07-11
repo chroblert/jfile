@@ -278,6 +278,15 @@ func readLine(r *bufio.Reader) (string, error) {
 	return string(line2), err
 }
 
+// 专门用于统计大文件行的行数，可以解决单行超过4096字节的文本读取问题
+func readLineForCount(r *bufio.Reader) error {
+	_, isprefix, err := r.ReadLine()
+	for isprefix && err == nil {
+		_, isprefix, err = r.ReadLine()
+	}
+	return err
+}
+
 // 判断文件内包含某个字节数组的数量,没有重叠 如：kkkk中包含两个kk
 func containsBytesCount(filepa string, cbytes []byte) int {
 	f, err := os.Open(filepa)
@@ -363,30 +372,39 @@ func FileCopy(src string, dst string, b_trunc bool) error {
 }
 
 // FileMove 文件移动从src到dst
-func FileMove(src string, dst string) error {
-	err := FileCopy(src, dst, true)
+func FileMove(src string, dst string) (err error) {
+	err = os.Rename(src, dst)
 	if err != nil {
-		return err
+		//fmt.Printf("Failed to rename file: %s\n", err)
+		return
 	}
-	err = os.Remove(src)
-	if err != nil {
-		return err
-	}
-	return nil
+	return
 }
 
 // GetLineCount 获取文件的行数
-func GetLineCount(filePath string) int64 {
+func GetLineCount(filePath string) (totalLine int64) {
 	//Open file
-	//var count int64
-	_, totalLine, err := ProcessLine64(filePath, func(lineNum int64, line string) error {
-		//count = int64(lineNum)
-		return JCONTINUE()
-	}, false)
+	f, err := os.OpenFile(filePath, os.O_RDONLY, 0)
 	if err != nil {
-		return 0
+		return -1
 	}
-	return totalLine
+	defer func() {
+		f.Close()
+	}()
+	r := bufio.NewReader(f)
+	var line_num int64 = 0
+	for {
+		err = readLineForCount(r)
+		if err != nil {
+			if err == io.EOF {
+				return line_num
+			}
+			return -1
+		}
+		// 使用传进来的函数处理line
+		line_num += 1
+	}
+	return
 }
 
 // GetLineData 获取特定第几行数据

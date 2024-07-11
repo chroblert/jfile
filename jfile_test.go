@@ -24,7 +24,7 @@ func TestProcessLineReverse(t *testing.T) {
 }
 
 func TestGetLineCount(t *testing.T) {
-	filePath := "C:\\T00ls\\01-GoProject\\HttpUtils\\core\\fingerprint\\assets_export_jz_domainscan_app3_goby.jsonl"
+	filePath := "C:\\T00ls\\01-GoProject\\HttpUtils\\core\\fingerprint\\assets_export_jz_domainscan.jsonl"
 	//var count int64
 	//timeStart := time.Now()
 	//_, _, err := ProcessLine64(filePath, func(lineNum int64, line string) error {
@@ -53,4 +53,10 @@ func TestGetLineCount2(t *testing.T) {
 	}
 	jlog.Debug(count, allLineNum, time.Now().Sub(timeStart).Seconds())
 	return
+}
+
+func TestFileMove(t *testing.T) {
+	srcFile := "C:\\T00ls\\01-GoProject\\HttpUtils\\core\\fingerprint\\assets_export_jz_domainscan_rename.jsonl"
+	dstFile := "C:\\T00ls\\01-GoProject\\HttpUtils\\core\\fingerprint\\assets_export_jz_domainscan.jsonl"
+	FileMove(srcFile, dstFile)
 }
