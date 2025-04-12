@@ -8,4 +8,5 @@ require (
 	github.com/chroblert/jlog v0.1.8
 	github.com/chroblert/jprogress v0.1.3
 	github.com/chroblert/jstr v0.1.2
+	github.com/tealeg/xlsx/v2 v2.0.1
 )

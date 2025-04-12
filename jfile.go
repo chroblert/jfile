@@ -88,7 +88,7 @@ func GetFilenamesByDir(root string) ([]string, error) {
 // bool: 是否遍历完全
 // int64:  处理到哪一行，从1开始
 // error: 报错
-func ProcessLine64(filename string, pf func(int64, string) error, isContinue bool) (bool, int64, error) {
+func ProcessLine64(filename string, pf func(lineNum int64, line string) (err error), isContinue bool) (bDone bool, doneLineNum int64, err error) {
 	f, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
 		return false, -1, err
@@ -132,7 +132,7 @@ func ProcessLine64(filename string, pf func(int64, string) error, isContinue boo
 // bool: 是否遍历完全
 // int:  处理到哪一行，从1开始
 // error: 报错
-func ProcessLine(filename string, pf func(int, string) error, isContinue bool) (bool, int, error) {
+func ProcessLine(filename string, pf func(lineNum int, line string) (err error), isContinue bool) (bDone bool, doneLineNum int, err error) {
 	f, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
 		return false, -1, err
@@ -180,7 +180,7 @@ func ProcessLine(filename string, pf func(int, string) error, isContinue bool) (
 // int:  处理到哪一个偏移，从-1开始，从后向前
 //
 // error: 报错
-func ProcessLineReverse64(filename string, pf func(int64, string) error, isContinue bool) (bComplete bool, offset int64, err error) {
+func ProcessLineReverse64(filename string, pf func(lineNum int64, line string) (err error), isContinue bool) (bDone bool, offset int64, err error) {
 	f, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
 		return false, -1, err
