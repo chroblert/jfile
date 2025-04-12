@@ -23,7 +23,7 @@ func TestProcessLine64v2(t *testing.T) {
 		{
 			name: "1",
 			args: args{
-				filename:  "D:\\Data\\250411-目标对象资产\\B方向机构子域名-250411 - Copy.xlsx",
+				filename:  "xxxx.xlsx",
 				sheetName: "",
 				pf: func(lineNum int64, cells []*xlsx.Cell) error {
 					cells[len(cells)-1].SetString("test")
